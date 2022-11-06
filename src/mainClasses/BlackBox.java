@@ -1,25 +1,25 @@
 package mainClasses;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import utils.Complex;
 import utils.Fraction;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeMap;
 
 public class BlackBox {
 
-    private static TreeMap<Integer, Integer> integerTreeMap;
-    private static TreeMap<Integer, Double> doubleTreeMap;
-    private static TreeMap<Integer, Fraction> fractionTreeMap;
-    private static TreeMap<Integer, Complex> complexTreeMap;
-    private static int kInteger;
-    private static int kDouble;
-    private static int kFraction;
-    private static int kComplex;
+    public static TreeMap<Integer, Integer> integerTreeMap;
+    public static TreeMap<Integer, Double> doubleTreeMap;
+    public static TreeMap<Integer, Fraction> fractionTreeMap;
+    public static TreeMap<Integer, Complex> complexTreeMap;
+    public static int kInteger;
+    public static int kDouble;
+    public static int kFraction;
+    public static int kComplex;
 
     public static TreeMap<Integer, Integer> getIntegerTreeMap() {
         return integerTreeMap;
@@ -165,7 +165,7 @@ public class BlackBox {
     public static void writeTreeWithMinK(PrintWriter out) {
         out.println("Tree with min K:");
         out.println();
-       int minK = findMin(kInteger, kDouble, kFraction, kComplex);
+        int minK = findMin(kInteger, kDouble, kFraction, kComplex);
         if (kInteger == minK) {
             writeIntegerTree(out);
         }
@@ -182,5 +182,96 @@ public class BlackBox {
 
     private static int findMin(int a, int b, int c, int d) {
         return Math.min(a, Math.min(b, Math.min(c, d)));
+    }
+
+    public static void jsonRead(String path, BlackBox blackBox) throws IOException, org.json.simple.parser.ParseException {
+        Object obj = new JSONParser().parse(new FileReader(path));
+        JSONObject jo = (JSONObject) obj;
+
+        blackBox.add(Integer.parseInt(String.valueOf(jo.get("int1"))));
+        blackBox.add(Integer.parseInt(String.valueOf(jo.get("int2"))));
+        blackBox.add(Integer.parseInt(String.valueOf(jo.get("int3"))));
+        blackBox.add(Integer.parseInt(String.valueOf(jo.get("int4"))));
+
+        blackBox.add(Double.parseDouble(String.valueOf(jo.get("double1"))));
+        blackBox.add(Double.parseDouble(String.valueOf(jo.get("double2"))));
+        blackBox.add(Double.parseDouble(String.valueOf(jo.get("double3"))));
+
+        blackBox.add(Integer.parseInt(String.valueOf(jo.get("fractionN1")), Integer.parseInt(String.valueOf(jo.get("fractionD1")))));
+        blackBox.add(Integer.parseInt(String.valueOf(jo.get("fractionN2")), Integer.parseInt(String.valueOf(jo.get("fractionD2")))));
+        blackBox.add(Integer.parseInt(String.valueOf(jo.get("fractionN3")), Integer.parseInt(String.valueOf(jo.get("fractionD3")))));
+
+        blackBox.add(Double.parseDouble(String.valueOf(jo.get("complexR1"))), Double.parseDouble(String.valueOf(jo.get("complexI1"))));
+        blackBox.add(Double.parseDouble(String.valueOf(jo.get("complexR2"))), Double.parseDouble(String.valueOf(jo.get("complexI2"))));
+    }
+
+    public static void jsonWriterMinK(String path, BlackBox blackBox) throws IOException s{
+        JSONObject json = new JSONObject();
+        FileWriter out = new FileWriter(path);
+        int minK = findMin(kInteger, kDouble, kFraction, kComplex);
+        if (kInteger == minK) {
+            writeIntegerJSON(json);
+        }
+        if (kDouble == minK) {
+            writeDoubleJSON(json);
+        }
+        if (kFraction == minK) {
+            writeFractionJSON(json);
+        }
+        if (kComplex == minK) {
+            writeComplexJSON(json);
+        }
+        out.write(json.toJSONString());
+        out.flush();
+    }
+
+    private static void writeComplexJSON(JSONObject json) {
+        json.put("Tree with min K", "Complex Tree");
+        json.put("K = ", kComplex);
+        Set complexKeys = complexTreeMap.keySet();
+        for (Iterator i = complexKeys.iterator(); i.hasNext(); ) {
+            Integer key = (Integer) i.next();
+            Complex value = complexTreeMap.get(key);
+            double value1 = value.getRe();
+            double value2 = value.getIm();
+            json.put("re", value1);
+            json.put("im", value2);
+        }
+    }
+
+    private static void writeFractionJSON(JSONObject json) {
+        json.put("Tree with min K", "Fraction Tree");
+        json.put("K = ", kFraction);
+        Set fractionKeys = fractionTreeMap.keySet();
+        for (Iterator i = fractionKeys.iterator(); i.hasNext(); ) {
+            Integer key = (Integer) i.next();
+            Fraction value = fractionTreeMap.get(key);
+            int value1 = value.getNumerator();
+            int value2 = value.getDenominator();
+            json.put("numerator", value1);
+            json.put("denominator", value2);
+        }
+    }
+
+    private static void writeDoubleJSON(JSONObject json) {
+        json.put("Tree with min K", "Double Tree");
+        json.put("K = ", kDouble);
+        Set doubleKeys = doubleTreeMap.keySet();
+        for (Iterator i = doubleKeys.iterator(); i.hasNext(); ) {
+            Integer key = (Integer) i.next();
+            Double value = doubleTreeMap.get(key);
+            json.put(key, value);
+        }
+    }
+
+    private static void writeIntegerJSON(JSONObject json) {
+        json.put("Tree with min K", "Integer Tree");
+        json.put("K = ", kInteger);
+        Set intKeys = integerTreeMap.keySet();
+        for (Iterator i = intKeys.iterator(); i.hasNext(); ) {
+            Integer key = (Integer) i.next();
+            Integer value = integerTreeMap.get(key);
+            json.put(key, value);
+        }
     }
 }
