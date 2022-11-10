@@ -2,9 +2,20 @@ package mainClasses;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 import utils.Complex;
 import utils.Fraction;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 import java.io.*;
 import java.util.Iterator;
 import java.util.Set;
@@ -104,13 +115,13 @@ public class BlackBox {
     }
 
     public static void writeBox(PrintWriter out) {
-        writeIntegerTree(out);
-        writeDoubleTree(out);
-        writeFractionTree(out);
-        writeComplexTree(out);
+        writeInt(out);
+        writeDouble(out);
+        writeFraction(out);
+        writeComplex(out);
     }
 
-    private static void writeComplexTree(PrintWriter out) {
+    private static void writeComplex(PrintWriter out) {
         out.println("ComlexTreeMap:");
         out.println("K = " + kComplex);
         Set complexKeys = complexTreeMap.keySet();
@@ -124,7 +135,7 @@ public class BlackBox {
         out.println();
     }
 
-    private static void writeFractionTree(PrintWriter out) {
+    private static void writeFraction(PrintWriter out) {
         out.println("FractionTreeMap:");
         out.println("K = " + kFraction);
         Set fractionKeys = fractionTreeMap.keySet();
@@ -138,7 +149,7 @@ public class BlackBox {
         out.println();
     }
 
-    private static void writeDoubleTree(PrintWriter out) {
+    private static void writeDouble(PrintWriter out) {
         out.println("DoubleTreeMap:");
         out.println("K = " + kDouble);
         Set doubleKeys = doubleTreeMap.keySet();
@@ -150,7 +161,7 @@ public class BlackBox {
         out.println();
     }
 
-    private static void writeIntegerTree(PrintWriter out) {
+    private static void writeInt(PrintWriter out) {
         out.println("IntegerTreeMap:");
         out.println("K = " + kInteger);
         Set intKeys = integerTreeMap.keySet();
@@ -162,21 +173,21 @@ public class BlackBox {
         out.println();
     }
 
-    public static void writeTreeWithMinK(PrintWriter out) {
+    public static void writeMinK(PrintWriter out) {
         out.println("Tree with min K:");
         out.println();
         int minK = findMin(kInteger, kDouble, kFraction, kComplex);
         if (kInteger == minK) {
-            writeIntegerTree(out);
+            writeInt(out);
         }
         if (kDouble == minK) {
-            writeDoubleTree(out);
+            writeDouble(out);
         }
         if (kFraction == minK) {
-            writeFractionTree(out);
+            writeFraction(out);
         }
         if (kComplex == minK) {
-            writeComplexTree(out);
+            writeComplex(out);
         }
     }
 
@@ -184,28 +195,48 @@ public class BlackBox {
         return Math.min(a, Math.min(b, Math.min(c, d)));
     }
 
-    public static void jsonRead(String path, BlackBox blackBox) throws IOException, org.json.simple.parser.ParseException {
+    public static void readJSON(String path, BlackBox blackBox) throws IOException, ParseException {
         Object obj = new JSONParser().parse(new FileReader(path));
         JSONObject jo = (JSONObject) obj;
-
-        blackBox.add(Integer.parseInt(String.valueOf(jo.get("int1"))));
-        blackBox.add(Integer.parseInt(String.valueOf(jo.get("int2"))));
-        blackBox.add(Integer.parseInt(String.valueOf(jo.get("int3"))));
-        blackBox.add(Integer.parseInt(String.valueOf(jo.get("int4"))));
-
-        blackBox.add(Double.parseDouble(String.valueOf(jo.get("double1"))));
-        blackBox.add(Double.parseDouble(String.valueOf(jo.get("double2"))));
-        blackBox.add(Double.parseDouble(String.valueOf(jo.get("double3"))));
-
-        blackBox.add(Integer.parseInt(String.valueOf(jo.get("fractionN1")), Integer.parseInt(String.valueOf(jo.get("fractionD1")))));
-        blackBox.add(Integer.parseInt(String.valueOf(jo.get("fractionN2")), Integer.parseInt(String.valueOf(jo.get("fractionD2")))));
-        blackBox.add(Integer.parseInt(String.valueOf(jo.get("fractionN3")), Integer.parseInt(String.valueOf(jo.get("fractionD3")))));
-
-        blackBox.add(Double.parseDouble(String.valueOf(jo.get("complexR1"))), Double.parseDouble(String.valueOf(jo.get("complexI1"))));
-        blackBox.add(Double.parseDouble(String.valueOf(jo.get("complexR2"))), Double.parseDouble(String.valueOf(jo.get("complexI2"))));
+        readIntJSON(blackBox, jo);
+        readDoubleJSON(blackBox, jo);
+        readFractionJSON(blackBox, jo);
+        readComplexJSON(blackBox, jo);
     }
 
-    public static void jsonWriterMinK(String path, BlackBox blackBox) throws IOException s{
+    private static void readComplexJSON(BlackBox blackBox, JSONObject jo) {
+        String strComplex = (String) jo.get("complex");
+        String[] masComplex = strComplex.split(" ");
+        for (int i = 0; i < masComplex.length; i += 2) {
+            blackBox.add(Double.parseDouble(masComplex[i]), Double.parseDouble(masComplex[i + 1]));
+        }
+    }
+
+    private static void readFractionJSON(BlackBox blackBox, JSONObject jo) {
+        String strFraction = (String) jo.get("fraction");
+        String[] masFraction = strFraction.split(" ");
+        for (int i = 0; i < masFraction.length; i += 2) {
+            blackBox.add(Integer.parseInt(masFraction[i]), Integer.parseInt(masFraction[i + 1]));
+        }
+    }
+
+    private static void readDoubleJSON(BlackBox blackBox, JSONObject jo) {
+        String strDouble = (String) jo.get("double");
+        String[] masDouble = strDouble.split(" ");
+        for (int i = 0; i < masDouble.length; i++) {
+            blackBox.add(Double.parseDouble(masDouble[i]));
+        }
+    }
+
+    private static void readIntJSON(BlackBox blackBox, JSONObject jo) {
+        String strInt = (String) jo.get("int");
+        String[] masInt = strInt.split(" ");
+        for (int i = 0; i < masInt.length; i++) {
+            blackBox.add(Integer.parseInt(masInt[i]));
+        }
+    }
+
+    public static void writeMinKJSON(String path) throws IOException {
         JSONObject json = new JSONObject();
         FileWriter out = new FileWriter(path);
         int minK = findMin(kInteger, kDouble, kFraction, kComplex);
@@ -228,50 +259,98 @@ public class BlackBox {
     private static void writeComplexJSON(JSONObject json) {
         json.put("Tree with min K", "Complex Tree");
         json.put("K = ", kComplex);
-        Set complexKeys = complexTreeMap.keySet();
-        for (Iterator i = complexKeys.iterator(); i.hasNext(); ) {
-            Integer key = (Integer) i.next();
-            Complex value = complexTreeMap.get(key);
-            double value1 = value.getRe();
-            double value2 = value.getIm();
-            json.put("re", value1);
-            json.put("im", value2);
-        }
     }
 
     private static void writeFractionJSON(JSONObject json) {
         json.put("Tree with min K", "Fraction Tree");
         json.put("K = ", kFraction);
-        Set fractionKeys = fractionTreeMap.keySet();
-        for (Iterator i = fractionKeys.iterator(); i.hasNext(); ) {
-            Integer key = (Integer) i.next();
-            Fraction value = fractionTreeMap.get(key);
-            int value1 = value.getNumerator();
-            int value2 = value.getDenominator();
-            json.put("numerator", value1);
-            json.put("denominator", value2);
-        }
     }
 
     private static void writeDoubleJSON(JSONObject json) {
         json.put("Tree with min K", "Double Tree");
         json.put("K = ", kDouble);
-        Set doubleKeys = doubleTreeMap.keySet();
-        for (Iterator i = doubleKeys.iterator(); i.hasNext(); ) {
-            Integer key = (Integer) i.next();
-            Double value = doubleTreeMap.get(key);
-            json.put(key, value);
-        }
     }
 
     private static void writeIntegerJSON(JSONObject json) {
         json.put("Tree with min K", "Integer Tree");
         json.put("K = ", kInteger);
-        Set intKeys = integerTreeMap.keySet();
-        for (Iterator i = intKeys.iterator(); i.hasNext(); ) {
-            Integer key = (Integer) i.next();
-            Integer value = integerTreeMap.get(key);
-            json.put(key, value);
+    }
+
+    public static void readXML(String path, BlackBox box) throws ParserConfigurationException, IOException, SAXException {
+        DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        Document document = docBuilder.parse(path);
+        Node root = document.getDocumentElement();
+        int val1 = 0;
+        int val2 = 0;
+        double val3 = 0.0;
+        double val4 = 0.0;
+        NodeList segments = root.getChildNodes();
+        for (int i = 0; i < segments.getLength(); i++) {
+            Node segment = segments.item(i);
+            if (segment.getNodeType() != Node.TEXT_NODE) {
+                NodeList segmentPoints = segment.getChildNodes();
+                for (int j = 0; j < segmentPoints.getLength(); j++) {
+                    Node segmentPoint = segmentPoints.item(j);
+                    if (segmentPoint.getNodeType() != Node.TEXT_NODE) {
+                        String name = segmentPoint.getNodeName();
+                        if (name == "int") {
+                            box.add(Integer.parseInt(segmentPoint.getChildNodes().item(0).getTextContent()));
+                        } else if (name == "double") {
+                            box.add(Double.parseDouble(segmentPoint.getChildNodes().item(0).getTextContent()));
+                        } else if (name == "fraction") {
+                            if (val1 != 0) {
+                                val2 = Integer.parseInt(segmentPoint.getChildNodes().item(0).getTextContent());
+                                box.add(val1, val2);
+                                val1 = 0;
+                            } else {
+                                val1 = Integer.parseInt(segmentPoint.getChildNodes().item(0).getTextContent());
+                            }
+                        } else {
+                            if (val3 != 0) {
+                                val4 = Double.parseDouble(segmentPoint.getChildNodes().item(0).getTextContent());
+                                box.add(val3, val4);
+                                val3 = 0;
+                            } else {
+                                val3 = Double.parseDouble(segmentPoint.getChildNodes().item(0).getTextContent());
+                            }
+                        }
+                    }
+                }
+            }
         }
+    }
+
+    public static void writeMinKXML(String path) throws IOException, XMLStreamException {
+        XMLOutputFactory output = XMLOutputFactory.newInstance();
+        XMLStreamWriter writer = output.createXMLStreamWriter(new FileWriter(path));
+        writer.writeStartDocument("UTF-8", "1.0");
+        int minK = findMin(kInteger, kDouble, kFraction, kComplex);
+        if (minK == kInteger) {
+            writer.writeStartElement("TreeWithMinK");
+            writer.writeCharacters("Integer Tree");
+            writer.writeStartElement("K");
+            writer.writeCharacters(String.valueOf(kInteger));
+        }
+        if (minK == kDouble) {
+            writer.writeStartElement("TreeWithMinK");
+            writer.writeCharacters("Double Tree");
+            writer.writeStartElement("K");
+            writer.writeCharacters(String.valueOf(kDouble));
+        }
+        if (minK == kFraction) {
+            writer.writeStartElement("TreeWithMinK");
+            writer.writeCharacters("Fraction Tree");
+            writer.writeStartElement("K");
+            writer.writeCharacters(String.valueOf(kFraction));
+        }
+        if (minK == kComplex) {
+            writer.writeStartElement("TreeWithMinK");
+            writer.writeCharacters("Complex Tree");
+            writer.writeStartElement("K");
+            writer.writeCharacters(String.valueOf(kComplex));
+        }
+        writer.writeEndElement();
+        writer.writeEndDocument();
+        writer.flush();
     }
 }
