@@ -1,0 +1,13 @@
+int 5
+int 6
+int 10
+int 34
+double 5.7
+double 1.4
+double 5.3
+fraction 12 6
+fraction 34 1
+fraction 6 3
+fraction 8 2
+complex 12.0 16.4
+complex 12.5 14.6

@@ -16,8 +16,8 @@ public class Main {
         BlackBox box = new BlackBox();
 
         box.readFile(br, box);
-        box.readXML("input.xml", box);
         box.readJSON("JSONjava.json", box);
+        box.readXML("input.xml", box);
 
         box.add(8);
         int[] masOfInt = new int[]{1, 2, 3, 4, 5, 6};
@@ -27,7 +27,7 @@ public class Main {
         masOfComplex[1] = new Complex(1.0, 1.4);
         masOfComplex[2] = new Complex(12.4, 17.4);
         box.add(masOfComplex);
-        
+
         box.writeBox(out);
         box.writeMinK(out);
         box.writeMinKJSON("JSONResult.json");

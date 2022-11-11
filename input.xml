@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NumbersForBlackBox>
+    <NumbersInt>
+        <int>5</int>
+        <int>6</int>
+        <int>10</int>
+        <int>34</int>
+    </NumbersInt>
+    <NumbersDouble>
+        <double>5.7</double>
+        <double>1.4</double>
+        <double>5.3</double>
+    </NumbersDouble>
+    <NumbersFraction>
+        <fraction>12</fraction>
+        <fraction>6</fraction>
+        <fraction>34</fraction>
+        <fraction>1</fraction>
+        <fraction>6</fraction>
+        <fraction>3</fraction>
+        <fraction>8</fraction>
+        <fraction>2</fraction>
+    </NumbersFraction>
+    <NumbersComplex>
+        <complex>12.0</complex>
+        <complex>16.4</complex>
+        <complex>12.5</complex>
+        <complex>14.6</complex>
+    </NumbersComplex>
+</NumbersForBlackBox>
