@@ -7,17 +7,22 @@ import utils.Complex;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import java.io.*;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
 
-
+//архивация rar
 public class Main {
-    public static void main(String[] args) throws IOException, ParseException, ParserConfigurationException, SAXException, XMLStreamException {
-        BufferedReader br = new BufferedReader(new FileReader("input.txt"));
-        PrintWriter out = new PrintWriter(new FileWriter("output.txt"));
+    public static void main(String[] args) throws IOException, ParseException, ParserConfigurationException, SAXException, XMLStreamException, NoSuchAlgorithmException, SignatureException, InvalidKeySpecException, NoSuchProviderException, InvalidKeyException {
         BlackBox box = new BlackBox();
-
-        box.readFile(br, box);
-        box.readJSON("JSONjava.json", box);
-        box.readXML("input.xml", box);
+        box.readFile("input.txt", box);
+//        box.readJSON("JSONjava.json", box);
+//        box.readXML("input.xml", box);
+//        box.readZIP ("arh.zip");
+//        box.readJAR("arh.jar");
+//        box.encryption("out.txt");
 
         box.add(8);
         int[] masOfInt = new int[]{1, 2, 3, 4, 5, 6};
@@ -28,10 +33,10 @@ public class Main {
         masOfComplex[2] = new Complex(12.4, 17.4);
         box.add(masOfComplex);
 
-        box.writeBox(out);
-        box.writeMinK(out);
-        box.writeMinKJSON("JSONResult.json");
-        box.writeMinKXML("output.xml");
-        out.flush();
+        box.writeBox("output.txt", box);
+//        box.writeJAR("output.txt", "output.jar");
+//        box.writeZIP("output.txt", "output.zip");
+//        box.writeMinKJSON("JSONResult.json");
+//        box.writeMinKXML("output.xml");
     }
 }

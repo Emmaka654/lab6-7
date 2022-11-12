@@ -20,6 +20,18 @@ import java.io.*;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
+import java.util.jar.JarOutputStream;
+import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
+import java.security.*;
+import java.security.spec.*;
+
+import static utils.GSig.saveToFile;
+import static utils.VSig.readFromFile;
 
 public class BlackBox {
 
@@ -99,7 +111,8 @@ public class BlackBox {
         }
     }
 
-    public static void readFile(BufferedReader br, BlackBox box) throws IOException {
+    public static void readFile(String path, BlackBox box) throws IOException {
+        BufferedReader br = new BufferedReader(new FileReader(path));
         String line;
         while ((line = br.readLine()) != null) {
             if (line.split(" ")[0].equals("int")) {
@@ -114,11 +127,14 @@ public class BlackBox {
         }
     }
 
-    public static void writeBox(PrintWriter out) {
+    public static void writeBox(String path, BlackBox box) throws IOException {
+        PrintWriter out = new PrintWriter(new FileWriter(path));
         writeInt(out);
         writeDouble(out);
         writeFraction(out);
         writeComplex(out);
+        box.writeMinK(out, path);
+        out.flush();
     }
 
     private static void writeComplex(PrintWriter out) {
@@ -173,7 +189,7 @@ public class BlackBox {
         out.println();
     }
 
-    public static void writeMinK(PrintWriter out) {
+    private static void writeMinK(PrintWriter out, String path) throws IOException {
         out.println("Tree with min K:");
         out.println();
         int minK = findMin(kInteger, kDouble, kFraction, kComplex);
@@ -353,4 +369,118 @@ public class BlackBox {
         writer.writeEndDocument();
         writer.flush();
     }
+
+    public static void readZIP(String path) throws IOException {
+        ZipInputStream zin = new ZipInputStream(new FileInputStream(path));
+        ZipEntry entry;
+        while ((entry = zin.getNextEntry()) != null) {
+            String name = entry.getName();
+            FileOutputStream fout = new FileOutputStream("new" + name);
+            for (int c = zin.read(); c != -1; c = zin.read()) {
+                fout.write(c);
+            }
+            fout.flush();
+            zin.closeEntry();
+            fout.close();
+        }
+    }
+
+    public static void writeZIP(String fileToArh, String arh) throws IOException {
+        ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(arh));
+        FileInputStream fis = new FileInputStream(fileToArh);
+        ZipEntry zipEntry = new ZipEntry("out.txt");
+        zipOutputStream.putNextEntry(zipEntry);
+        byte[] buffer = new byte[fis.available()];
+        fis.read(buffer);
+        zipOutputStream.write(buffer);
+        fis.close();
+        zipOutputStream.close();
+    }
+
+    public static void readJAR(String path) throws IOException {
+        JarInputStream zin = new JarInputStream(new FileInputStream(path));
+        JarEntry entry;
+        while ((entry = zin.getNextJarEntry()) != null) {
+            String name = entry.getName();
+            FileOutputStream fout = new FileOutputStream("new" + name);
+            for (int c = zin.read(); c != -1; c = zin.read()) {
+                fout.write(c);
+            }
+            fout.flush();
+            zin.closeEntry();
+            fout.close();
+        }
+    }
+
+    public static void writeJAR(String fileToArh, String arh) throws IOException {
+        JarOutputStream jarOutputStream = new JarOutputStream(new FileOutputStream(arh));
+        FileInputStream fis = new FileInputStream(fileToArh);
+        JarEntry jarEntry = new JarEntry("out.txt");
+        jarOutputStream.putNextEntry(jarEntry);
+        byte[] buffer = new byte[fis.available()];
+        fis.read(buffer);
+        jarOutputStream.write(buffer);
+        fis.close();
+        jarOutputStream.close();
+    }
+
+    public static void encryption(String file) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, IOException, SignatureException, InvalidKeySpecException {
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA", "SUN");
+        SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
+        keyGen.initialize(1024, random);
+        KeyPair pair = keyGen.generateKeyPair();
+        PrivateKey priv = pair.getPrivate();
+        PublicKey pub = pair.getPublic();
+        Signature dsa = Signature.getInstance("SHA1withDSA", "SUN");
+        dsa.initSign(priv);
+        FileInputStream fis = new FileInputStream(file);
+        BufferedInputStream bufin = new BufferedInputStream(fis);
+        byte[] buffer = new byte[1024];
+        int len;
+        while (bufin.available() != 0) {
+            len = bufin.read(buffer);
+            dsa.update(buffer, 0, len);
+        }
+        bufin.close();
+        byte[] realSig = dsa.sign();
+        saveToFile(realSig, "signature.txt");
+        byte[] key = pub.getEncoded();
+        saveToFile(key, "pubkey.txt");
+
+
+        byte[] encKey = readFromFile("pubkey.txt");
+        X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(encKey);
+        KeyFactory keyFactory = KeyFactory.getInstance("DSA", "SUN");
+        PublicKey pubKey = keyFactory.generatePublic(pubKeySpec);
+        byte[] sigToVerify = readFromFile("signature.txt");
+        Signature sig = Signature.getInstance("SHA1withDSA", "SUN");
+        sig.initVerify(pubKey);
+        FileInputStream datafis = new FileInputStream(file);
+        BufferedInputStream bufin1 = new BufferedInputStream(datafis);
+        byte[] buffer1 = new byte[1024];
+        int len1;
+        while (bufin1.available() != 0) {
+            len1 = bufin1.read(buffer1);
+            sig.update(buffer1, 0, len1);
+        }
+        bufin1.close();
+        boolean verifies = sig.verify(sigToVerify);
+        System.out.println("Signature verifies: " + verifies);
+    }
+
+//    public static void readRAR(String path) {
+//        File f = new File(filename);
+//        Archive archive = new Archive(f);
+//        archive.getMainHeader().print();
+//        FileHeader fh = archive.nextFileHeader();
+//        while (fh != null) {
+//            File fileEntry = new File(fh.getFileNameString().trim());
+//            System.out.println(fileEntry.getAbsolutePath());
+//            FileOutputStream os = new FileOutputStream(fileEntry);
+//            archive.extractFile(fh, os);
+//            os.close();
+//            fh = archive.nextFileHeader();
+//        }
+//    }
+
 }
