@@ -1,5 +1,6 @@
 package mainClasses;
 
+import com.github.junrar.exception.RarException;
 import org.json.simple.parser.ParseException;
 import org.xml.sax.SAXException;
 import utils.Complex;
@@ -13,16 +14,15 @@ import java.security.NoSuchProviderException;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 
-//архивация rar
 public class Main {
-    public static void main(String[] args) throws IOException, ParseException, ParserConfigurationException, SAXException, XMLStreamException, NoSuchAlgorithmException, SignatureException, InvalidKeySpecException, NoSuchProviderException, InvalidKeyException {
+    public static void main(String[] args) throws IOException, ParseException, ParserConfigurationException, SAXException, XMLStreamException, NoSuchAlgorithmException, SignatureException, InvalidKeySpecException, NoSuchProviderException, InvalidKeyException, RarException {
         BlackBox box = new BlackBox();
         box.readFile("input.txt", box);
-//        box.readJSON("JSONjava.json", box);
-//        box.readXML("input.xml", box);
-//        box.readZIP ("arh.zip");
-//        box.readJAR("arh.jar");
-//        box.encryption("out.txt");
+        box.readJSON("JSONjava.json", box);
+        box.readXML("input.xml", box);
+        box.readZIP("arh.zip");
+        box.readJAR("arh.jar");
+        box.encryption("output.txt");
 
         box.add(8);
         int[] masOfInt = new int[]{1, 2, 3, 4, 5, 6};
@@ -34,9 +34,9 @@ public class Main {
         box.add(masOfComplex);
 
         box.writeBox("output.txt", box);
-//        box.writeJAR("output.txt", "output.jar");
-//        box.writeZIP("output.txt", "output.zip");
-//        box.writeMinKJSON("JSONResult.json");
-//        box.writeMinKXML("output.xml");
+        box.writeJAR("output.txt", "output.jar");
+        box.writeZIP("output.txt", "output.zip");
+        box.writeMinKJSON("JSONResult.json");
+        box.writeMinKXML("output.xml");
     }
 }

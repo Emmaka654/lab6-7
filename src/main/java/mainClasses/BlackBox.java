@@ -1,5 +1,10 @@
 package mainClasses;
 
+import com.adarshr.raroscope.RAREntry;
+import com.adarshr.raroscope.RARFile;
+import com.github.junrar.Archive;
+import com.github.junrar.exception.RarException;
+import com.github.junrar.rarfile.FileHeader;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -17,13 +22,13 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.*;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import java.util.jar.JarOutputStream;
-import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -468,10 +473,8 @@ public class BlackBox {
         System.out.println("Signature verifies: " + verifies);
     }
 
-//    public static void readRAR(String path) {
-//        File f = new File(filename);
-//        Archive archive = new Archive(f);
-//        archive.getMainHeader().print();
+//    public static void readRAR(String path) throws IOException, RarException {
+//        Archive archive = new Archive(new File(path));
 //        FileHeader fh = archive.nextFileHeader();
 //        while (fh != null) {
 //            File fileEntry = new File(fh.getFileNameString().trim());
@@ -480,6 +483,16 @@ public class BlackBox {
 //            archive.extractFile(fh, os);
 //            os.close();
 //            fh = archive.nextFileHeader();
+//        }
+//    }
+
+
+//    public static void readRAR(String path) throws IOException {
+//        RARFile file = new RARFile(path);
+//        Enumeration<RAREntry> entries = file.entries();
+//        while (entries.hasMoreElements()) {
+//            RAREntry entry = entries.nextElement();
+//            System.out.println(entry.getName());
 //        }
 //    }
 
